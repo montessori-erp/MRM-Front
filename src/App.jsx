@@ -8,6 +8,7 @@
 // import Register from './pages/Register';
 // import Dashboard from './pages/Dashboard';
 // import Inventory from './pages/Inventory';
+// import ResetPassword from './pages/ResetPassword';
 
 // // Ticket System
 // import Tickets from './pages/Tickets';
@@ -20,13 +21,9 @@
 // import Admins from './pages/Admins';
 // import DirectorDashboard from './pages/DirectorDashboard';
 
-// // --- KITCHEN ORDERING SYSTEM PAGES ---
+// // Kitchen & Orders
 // import KitchenOrder from './pages/KitchenOrder';
 // import AdminOrders from './pages/AdminOrders';
-
-
-// import ResetPassword from './pages/ResetPassword';
-
 
 // function AppRoutes() {
 //   const { user, loading } = useAuth();
@@ -35,11 +32,20 @@
 
 //   return (
 //     <Routes>
-//       {/* Auth Routes */}
-//       <Route path="/login" element={user ? <Navigate to="/" replace /> : <Login />} />
-//       <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
+//       {/* --- PUBLIC ROUTES (No Login Required) --- */}
+//       <Route 
+//         path="/login" 
+//         element={user ? <Navigate to="/" replace /> : <Login />} 
+//       />
+//       <Route 
+//         path="/register" 
+//         element={user ? <Navigate to="/" replace /> : <Register />} 
+//       />
       
-//       {/* Protected App Routes (Inside Layout) */}
+//       {/* CRITICAL: Reset Password must be PUBLIC and OUTSIDE the Layout */}
+//       <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+//       {/* --- PROTECTED ROUTES (Requires Login & Inside Layout) --- */}
 //       <Route
 //         path="/"
 //         element={
@@ -47,7 +53,7 @@
 //             <Layout />
 //           </ProtectedRoute>
 //         }
-//       ><Route path="/reset-password/:token" element={<ResetPassword />} />
+//       >
 //         {/* Dashboard & Inventory */}
 //         <Route index element={<Dashboard />} />
 //         <Route path="inventory" element={<Inventory />} />
@@ -57,9 +63,7 @@
 //         <Route path="tickets/new" element={<TicketNew />} />
 //         <Route path="tickets/:id" element={<TicketDetail />} />
 
-//         {/* --- KITCHEN SYSTEM INTEGRATION --- */}
-        
-//         {/* Accessible to Kitchen staff, Admins, and Ram (Staff role) */}
+//         {/* Kitchen System */}
 //         <Route 
 //           path="kitchen-order" 
 //           element={
@@ -68,8 +72,6 @@
 //             </ProtectedRoute>
 //           } 
 //         />
-
-//         {/* Admin Approval Dashboard */}
 //         <Route 
 //           path="admin-approvals" 
 //           element={
@@ -79,7 +81,7 @@
 //           } 
 //         />
 
-//         {/* --- ADMIN & SUPER-ADMIN ONLY --- */}
+//         {/* Admin & Management */}
 //         <Route
 //           path="audits"
 //           element={
@@ -138,17 +140,6 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -160,6 +151,7 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
 import ResetPassword from './pages/ResetPassword';
+import ForgotPassword from './pages/ForgotPassword';
 
 // Ticket System
 import Tickets from './pages/Tickets';
@@ -192,8 +184,7 @@ function AppRoutes() {
         path="/register" 
         element={user ? <Navigate to="/" replace /> : <Register />} 
       />
-      
-      {/* CRITICAL: Reset Password must be PUBLIC and OUTSIDE the Layout */}
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password/:token" element={<ResetPassword />} />
 
       {/* --- PROTECTED ROUTES (Requires Login & Inside Layout) --- */}
@@ -205,16 +196,12 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        {/* Dashboard & Inventory */}
         <Route index element={<Dashboard />} />
         <Route path="inventory" element={<Inventory />} />
-        
-        {/* Ticket Management */}
         <Route path="tickets" element={<Tickets />} />
         <Route path="tickets/new" element={<TicketNew />} />
         <Route path="tickets/:id" element={<TicketDetail />} />
 
-        {/* Kitchen System */}
         <Route 
           path="kitchen-order" 
           element={
@@ -232,7 +219,6 @@ function AppRoutes() {
           } 
         />
 
-        {/* Admin & Management */}
         <Route
           path="audits"
           element={
@@ -267,7 +253,6 @@ function AppRoutes() {
         />
       </Route>
       
-      {/* Fallback Catch-all */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
