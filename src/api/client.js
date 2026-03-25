@@ -32,22 +32,22 @@
 
 // export default client;
 
-
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://mrm-niu2.onrender.com';
 
 const client = axios.create({
   baseURL: `${API_BASE_URL}/api`,
-  withCredentials: true, // Required for cookies and cross-origin sessions
+  // Required if you ever decide to use HttpOnly cookies alongside tokens
+  withCredentials: true, 
 });
 
-// REQUEST INTERCEPTOR
+// THE FIX: This interceptor runs BEFORE every single request
 client.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      // Use standard Bearer format
+      // Must be 'Bearer ' followed by the token string
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -55,14 +55,13 @@ client.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// RESPONSE INTERCEPTOR
 client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      console.warn("Session expired or unauthorized");
-      // Optional: localStorage.removeItem('token'); 
-      // window.location.href = '/login';
+      console.warn("Unauthorized! Clearing token...");
+      localStorage.removeItem('token');
+      // window.location.href = '/login'; 
     }
     return Promise.reject(error);
   }
