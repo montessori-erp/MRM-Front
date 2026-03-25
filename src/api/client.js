@@ -33,23 +33,21 @@
 // export default client;
 
 
-
-
 import axios from 'axios';
 
-// This will use the Vercel Environment Variable, or your Render URL as a fallback
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://mrm-niu2.onrender.com';
 
 const client = axios.create({
-  // We add /api here so you don't have to repeat it in every request
-  baseURL: `${API_BASE_URL}/api`, 
+  baseURL: `${API_BASE_URL}/api`,
+  withCredentials: true, // Required for cookies and cross-origin sessions
 });
 
-// REQUEST INTERCEPTOR: Attach Token
+// REQUEST INTERCEPTOR
 client.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
+      // Use standard Bearer format
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -57,13 +55,14 @@ client.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// RESPONSE INTERCEPTOR: Handle 401 globally
+// RESPONSE INTERCEPTOR
 client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       console.warn("Session expired or unauthorized");
-      // Optional: window.location.href = '/login';
+      // Optional: localStorage.removeItem('token'); 
+      // window.location.href = '/login';
     }
     return Promise.reject(error);
   }

@@ -8,10 +8,21 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const loadUser = async () => {
+    // Check if a token exists before even trying to call auth.me()
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { user: u } = await auth.me();
-      setUser(u);
-    } catch {
+      const response = await auth.me();
+      // Adjust this based on your API response structure 
+      // (usually it's response.data.user or just response.user)
+      setUser(response.user || response); 
+    } catch (error) {
+      console.error("Load user error:", error);
+      localStorage.removeItem('token'); // Clear invalid token
       setUser(null);
     } finally {
       setLoading(false);
@@ -22,8 +33,10 @@ export function AuthProvider({ children }) {
     loadUser();
   }, []);
 
+  // Listen for custom logout events
   useEffect(() => {
     const onLogout = () => {
+      localStorage.removeItem('token');
       setUser(null);
     };
     window.addEventListener('auth:logout', onLogout);
@@ -31,20 +44,40 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const { user: u } = await auth.login(email, password);
-    setUser(u);
-    return u;
+    const response = await auth.login(email, password);
+    
+    // CRITICAL FIX: Save the token to localStorage
+    // Ensure your backend returns the token in the login response
+    if (response.token) {
+      localStorage.setItem('token', response.token);
+    }
+
+    setUser(response.user || response);
+    return response.user || response;
   };
 
   const register = async (data) => {
-    const { user: u } = await auth.register(data);
-    setUser(u);
-    return u;
+    const response = await auth.register(data);
+    
+    // Save token if registration also logs the user in
+    if (response.token) {
+      localStorage.setItem('token', response.token);
+    }
+
+    setUser(response.user || response);
+    return response.user || response;
   };
 
   const logout = async () => {
-    await auth.logout();
-    setUser(null);
+    try {
+      await auth.logout();
+    } catch (err) {
+      console.error("Logout API error:", err);
+    } finally {
+      // Always clear local data even if API call fails
+      localStorage.removeItem('token');
+      setUser(null);
+    }
   };
 
   return (
@@ -59,11 +92,6 @@ export function useAuth() {
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
 }
-
-
-
-
-
 
 
 
