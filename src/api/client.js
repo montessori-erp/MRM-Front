@@ -54,14 +54,13 @@ client.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
-
 client.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      console.warn("Unauthorized! Clearing token...");
       localStorage.removeItem('token');
-      // window.location.href = '/login'; 
+      // Force redirect so the user doesn't stay on a broken page
+      window.location.href = '/login'; 
     }
     return Promise.reject(error);
   }

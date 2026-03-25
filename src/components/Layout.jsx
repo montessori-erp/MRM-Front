@@ -53,11 +53,11 @@ export default function Layout() {
     ] : []),
   ];
 
-  const { data: belowThreshold = [] } = useQuery({
-    queryKey: ['inventory', 'below-threshold'],
-    queryFn: inventory.belowThreshold,
-    enabled: !!user,
-  });
+ const { data: belowThreshold = [] } = useQuery({
+  queryKey: ['inventory', 'below-threshold'],
+  queryFn: inventory.belowThreshold,
+  enabled: !!user && !!localStorage.getItem('token'), // Added extra check
+});
 
   const handleLogout = () => {
     logout();
